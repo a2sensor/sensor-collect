@@ -37,11 +37,17 @@
   };
   outputs = inputs:
     with inputs;
-    flake-utils.lib.eachDefaultSystem (system:
+    let
+      defaultSystems = flake-utils.lib.defaultSystems;
+      supportedSystems = if builtins.elem "armv6l-linux" defaultSystems then
+        defaultSystems
+      else
+        defaultSystems ++ [ "armv6l-linux" ];
+    in flake-utils.lib.eachSystem supportedSystems (system:
       let
         org = "a2sensor";
         repo = "sensor-collect";
-        version = "0.0.1";
+        version = "0.0.2";
         pname = "${org}-${repo}";
         pkgs = import nixos { inherit system; };
         description =
@@ -49,9 +55,9 @@
         license = pkgs.lib.licenses.gpl3;
         homepage = "https://github.com/a2sensor/sensor-collect";
         maintainers = [ "rydnr <github@acm-sl.org>" ];
-        archRole = "S";
+        archRole = "B";
         space = "D";
-        layer = "D";
+        layer = "A";
         nixosVersion = builtins.readFile "${nixos}/.version";
         nixpkgsRelease = "nixos-${nixosVersion}";
         shared = import "${pythoneda-shared-pythoneda-banner}/nix/shared.nix";
