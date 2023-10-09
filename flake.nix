@@ -1,8 +1,8 @@
-# domain/flake.nix
+# flake.nix
 #
-# This file packages pythoneda-shared-pythoneda/domain as a Nix flake.
+# This file packages a2sensor/sensor-collect as a Nix flake.
 #
-# Copyright (C) 2023-today rydnr's pythoneda-shared-pythoneda/domain
+# Copyright (C) 2023-today a2sensor's a2sensor/sensor-collect
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
     pythoneda-shared-pythoneda-banner = {
       inputs.flake-utils.follows = "flake-utils";
       inputs.nixos.follows = "nixos";
-      url = "github:pythoneda-shared-pythoneda/banner/0.0.6";
+      url = "github:pythoneda-shared-pythoneda/banner/0.0.7";
     };
     pythoneda-shared-pythoneda-domain = {
       inputs.flake-utils.follows = "flake-utils";
@@ -32,7 +32,7 @@
       inputs.pythoneda-shared-pythoneda-banner.follows =
         "pythoneda-shared-pythoneda-banner";
       url =
-        "github:pythoneda-shared-pythoneda/domain-artifact/0.0.6?dir=domain";
+        "github:pythoneda-shared-pythoneda/domain-artifact/0.0.8?dir=domain";
     };
   };
   outputs = inputs:
