@@ -18,7 +18,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+from datetime import datetime
 from flask import Flask, request, jsonify
+import json
+import os
+from typing import Dict
 
 class Server():
     """
@@ -32,12 +36,19 @@ class Server():
     Collaborators:
         - None
     """
-    def __init__(self):
+    def __init__(self, storageFolder:str):
         """
         Creates a new Server instance.
+        :param storageFolder: The folder to store measures.
+        :type storageFolder: str
         """
         super().__init__()
         self._app = Flask(__name__)
+        self._storage_folder = storageFolder
+
+        if not os.path.exists(self._storage_folder):
+            os.makedirs(self._storage_folder)  # create the folder if it doesn't exist
+
         self.setup_routes()
 
     @property
@@ -49,13 +60,22 @@ class Server():
         """
         return self._app
 
+    @property
+    def storage_folder(self):
+        """
+        Retrieves the storage folder.
+        :return: Such value.
+        :rtype: str
+        """
+        return self._storage_folder
+
     def setup_routes(self):
         """
         Defines the application routes.
         """
         self.app.add_url_rule('/v1/<sensorId>/measure', 'measure_endpoint', self.measure_endpoint, methods=['PUT'])
 
-    def measure_endpoint(self, sensorId):
+    def measure_endpoint(self, sensorId:str):
         """
         Collects a new measure from given sensor.
         :param sensorId: The id of the sensor.
@@ -65,23 +85,32 @@ class Server():
             return jsonify({"error": "Invalid JSON format"}), 400
 
         data = request.get_json()
-        value1 = data.get("value1")
-        value2 = data.get("value2")
-        value3 = data.get("value3")
-        value4 = data.get("value4")
 
-        # Process or store the data (for now, just print)
-        print(f"Sensor ID: {sensorId}")
-        print(f"Value 1: {value1}")
-        print(f"Value 2: {value2}")
-        print(f"Value 3: {value3}")
-        print(f"Value 4: {value4}")
+        self.save_to_file(sensorId, data)
 
         return jsonify({"status": "success"}), 200
+
+    def save_to_file(self, sensorId:str, data:Dict):
+        """
+        Saves given measure to disk.
+        :param sensorId: The id of the sensor.
+        :type sensorId: str
+        :param data: The measure.
+        :type data: Dict
+        """
+        folder = os.path.join(self.storage_folder, sensorId)
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+        filepath = os.path.join(folder, f"{timestamp}.json")
+
+        with open(filepath, 'w') as file:
+            json.dump(data, file)
 
     def run(self):
         self.app.run(debug=True)
 
 if __name__ == '__main__':
-    server = Server()
+    server = Server("data")
     server.run()
