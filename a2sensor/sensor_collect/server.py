@@ -109,7 +109,7 @@ def parse_cli():
 app = Flask(__name__)
 
 @app.route("/v1/<sensorId>/measure", methods=['PUT'])
-def measure_endpoint(self, sensorId: str):
+def measure_endpoint(sensorId: str):
     """
     Collects a new measure from given sensor.
     :param sensorId: The id of the sensor.
