@@ -36,6 +36,8 @@ class Server():
     Collaborators:
         - None
     """
+    _instance = None
+
     def __init__(self, storageFolder:str):
         """
         Creates a new Server instance.
@@ -43,22 +45,10 @@ class Server():
         :type storageFolder: str
         """
         super().__init__()
-        self._app = Flask(__name__)
         self._storage_folder = storageFolder
 
         if not os.path.exists(self._storage_folder):
             os.makedirs(self._storage_folder)  # create the folder if it doesn't exist
-
-        self.setup_routes()
-
-    @property
-    def app(self):
-        """
-        Retrieves the Flask application.
-        :return: Such instance.
-        :rtype: flask.Flask
-        """
-        return self._app
 
     @property
     def storage_folder(self):
@@ -68,27 +58,6 @@ class Server():
         :rtype: str
         """
         return self._storage_folder
-
-    def setup_routes(self):
-        """
-        Defines the application routes.
-        """
-        self.app.add_url_rule('/v1/<sensorId>/measure', 'measure_endpoint', self.measure_endpoint, methods=['PUT'])
-
-    def measure_endpoint(self, sensorId:str):
-        """
-        Collects a new measure from given sensor.
-        :param sensorId: The id of the sensor.
-        :type sensorId: str
-        """
-        if not request.is_json:
-            return jsonify({"error": "Invalid JSON format"}), 400
-
-        data = request.get_json()
-
-        self.save_to_file(sensorId, data)
-
-        return jsonify({"status": "success"}), 200
 
     def save_to_file(self, sensorId:str, data:Dict):
         """
@@ -108,9 +77,53 @@ class Server():
         with open(filepath, 'w') as file:
             json.dump(data, file)
 
-    def run(self):
-        self.app.run(debug=True)
+    @classmethod
+    def configure(cls, folder:str):
+        """
+        Configures the server to use that folder.
+        :param folder: The storage folder.
+        :type folder: str
+        """
+        cls._instance = Server(folder)
 
-if __name__ == '__main__':
-    server = Server("data")
-    server.run()
+    @classmethod
+    def instance(cls):
+        """
+        Retrieves the singleton instance.
+        :return: Such instance.
+        :rtype: a2sensor.sensor_collect.Server
+        """
+        return cls._instance
+
+def parse_cli():
+    """
+    Parses the command-line arguments.
+    :return: The Server instance.
+    :rtype: a2sensor.sensor_collect.Server
+    """
+    parser = argparse.ArgumentParser(description="Runs A2Sensor Sensor-Collect")
+    parser.add_argument('-d', '--data-folder', required=True, help='The data folder')
+    args, unknown_args = parser.parse_known_args()
+    Server.configure(args.data_folder)
+
+app = Flask(__name__)
+
+@app.route("/v1/<sensorId>/measure", methods=['PUT'])
+def measure_endpoint(self, sensorId: str):
+    """
+    Collects a new measure from given sensor.
+    :param sensorId: The id of the sensor.
+    :type sensorId: str
+    """
+    if not request.is_json:
+        return jsonify({"error": "Invalid JSON format"}), 400
+
+    data = request.get_json()
+
+    Server.instance().save_to_file(sensorId, data)
+
+    return jsonify({"status": "success"}), 200
+
+if __name__ == "__main__":
+    Server.parse_cli()
+    app.run()
