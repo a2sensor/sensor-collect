@@ -22,6 +22,7 @@ from datetime import datetime
 from flask import Flask, request, jsonify
 import json
 import os
+import sys
 from typing import Dict
 
 class Server():
@@ -78,13 +79,18 @@ class Server():
             json.dump(data, file)
 
     @classmethod
-    def configure(cls, folder:str):
+    def configure(cls):
         """
         Configures the server to use that folder.
         :param folder: The storage folder.
         :type folder: str
         """
-        cls._instance = Server(folder)
+        folder = os.environ.get('DATA_FOLDER', None)
+        if folder is None:
+            print(f"Error: The required environment variable DATA_FOLDER is not set.")
+            sys.exit(1)
+        else:
+            cls._instance = Server(folder)
 
     @classmethod
     def instance(cls):
@@ -94,17 +100,6 @@ class Server():
         :rtype: a2sensor.sensor_collect.Server
         """
         return cls._instance
-
-def parse_cli():
-    """
-    Parses the command-line arguments.
-    :return: The Server instance.
-    :rtype: a2sensor.sensor_collect.Server
-    """
-    parser = argparse.ArgumentParser(description="Runs A2Sensor Sensor-Collect")
-    parser.add_argument('-d', '--data-folder', required=True, help='The data folder')
-    args, unknown_args = parser.parse_known_args()
-    Server.configure(args.data_folder)
 
 app = Flask(__name__)
 
@@ -124,6 +119,4 @@ def measure_endpoint(sensorId: str):
 
     return jsonify({"status": "success"}), 200
 
-if __name__ == "__main__":
-    Server.parse_cli()
-    app.run()
+Server.configure()

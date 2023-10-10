@@ -19,4 +19,11 @@ export _PYTHONEDA_DEPS
 _PYTHONEDA_PYTHONEDA_DEPS="$(echo "$PYTHONPATH" | sed 's : \n g' | grep -c 'pythoneda')"
 export _PYTHONEDA_PYTHONEDA_DEPS
 @BANNER@ -o "@org@" -r "@repo@" -t "@version@" -s "@pescio_space@" -a "@arch_role@" -l "@hexagonal_layer@" -p "@python_version@" -D "$_PYTHONEDA_DEPS" -d "$_PYTHONEDA_PYTHONEDA_DEPS" -n "@nixpkgs_release@"
-@gunicorn@/bin/gunicorn a2sensor.sensor_collect.server:app
+
+if [ "$#" -lt 1 ]; then
+    echo "Error: Missing mandatory data-folder argument."
+    echo "Usage: $0 <data-folder>"
+    exit 1
+fi
+
+DATA_FOLDER=$1 @gunicorn@/bin/gunicorn a2sensor.sensor_collect.server:app

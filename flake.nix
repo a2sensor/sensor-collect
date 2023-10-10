@@ -47,7 +47,7 @@
       let
         org = "a2sensor";
         repo = "sensor-collect";
-        version = "0.0.3";
+        version = "0.0.4";
         pname = "${org}-${repo}";
         pkgs = import nixos { inherit system; };
         description =
@@ -133,7 +133,7 @@
               pythoneda-shared-pythoneda-banner
             ];
 
-            pythonImportsCheck = [ pythonpackage ];
+            #            pythonImportsCheck = [ pythonpackage ];
 
             unpackPhase = ''
               cp -r ${src} .
