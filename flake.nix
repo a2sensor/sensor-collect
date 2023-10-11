@@ -47,7 +47,7 @@
       let
         org = "a2sensor";
         repo = "sensor-collect";
-        version = "0.0.4";
+        version = "0.0.5";
         pname = "${org}-${repo}";
         pkgs = import nixos { inherit system; };
         description =
@@ -90,6 +90,7 @@
                 version;
               package = builtins.replaceStrings [ "." ] [ "/" ] pythonpackage;
               flask = python.pkgs.flask.version;
+              rpiGpio = python.pkgs.rpi-gpio.version;
               gunicorn = python.pkgs.gunicorn.version;
               src = pyprojectTemplateFile;
             };
@@ -131,6 +132,7 @@
               flask
               gunicorn
               pythoneda-shared-pythoneda-banner
+              rpi-gpio
             ];
 
             #            pythonImportsCheck = [ pythonpackage ];

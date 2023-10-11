@@ -27,6 +27,7 @@ packages = [{include = "@package@"}]
 
 [tool.poetry.dependencies]
 flask = "^@flask@"
+rpi-gpio = "^@rpiGpio@"
 gunicorn = "^@gunicorn@"
 python = "^@pythonMajorMinorVersion@"
 
