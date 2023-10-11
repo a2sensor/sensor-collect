@@ -30,6 +30,7 @@ flask = "^@flask@"
 rpi-gpio = "^@rpiGpio@"
 gunicorn = "^@gunicorn@"
 python = "^@pythonMajorMinorVersion@"
+toml = "^@toml@"
 
 [build-system]
 requires = ["poetry-core"]

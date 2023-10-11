@@ -92,6 +92,7 @@
               flask = python.pkgs.flask.version;
               rpiGpio = python.pkgs.rpi-gpio.version;
               gunicorn = python.pkgs.gunicorn.version;
+              toml = python.pkgs.toml.version;
               src = pyprojectTemplateFile;
             };
             bannerTemplateFile = ./templates/banner.py.template;
@@ -133,6 +134,7 @@
               gunicorn
               pythoneda-shared-pythoneda-banner
               rpi-gpio
+              toml
             ];
 
             #            pythonImportsCheck = [ pythonpackage ];

@@ -1,0 +1,14 @@
+[sensor_1]
+name = "Sensor 1"
+pin = 1
+wait = 1
+
+[sensor_2]
+name = "Sensor 2"
+pin = 2
+wait = 1
+
+[sensor_3]
+name = "Sensor 3"
+pin = 3
+wait = 1
