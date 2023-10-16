@@ -117,17 +117,15 @@ class Server():
             json.dump(data, file)
 
     @classmethod
-    def configure(cls, localSensorsFile:str=None):
+    def configure(cls, dataFolder:str=None, localSensorsFile:str=None):
         """
         Configures the server to use that folder.
-        :param folder: The storage folder.
-        :type folder: str
+        :param dataFolder: The storage folder.
+        :type dataFolder: str
+        :param localSensorsFile: The sensor definition file.
+        :type localSensorsFile: str
         """
-        folder = os.environ.get('DATA_FOLDER', None)
-        if folder is None:
-            print(f"Error: The required environment variable DATA_FOLDER is not set.")
-            sys.exit(1)
-        cls._instance = Server(folder, localSensorsFile)
+        cls._instance = Server(dataFolder, localSensorsFile)
 
     @classmethod
     def instance(cls):

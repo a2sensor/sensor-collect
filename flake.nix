@@ -47,7 +47,7 @@
       let
         org = "a2sensor";
         repo = "sensor-collect";
-        version = "0.0.6";
+        version = "0.0.7";
         pname = "${org}-${repo}";
         pkgs = import nixos { inherit system; };
         description =

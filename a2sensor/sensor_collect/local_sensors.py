@@ -19,6 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 from collections import deque
+from itertools import islice
 import logging
 import RPi.GPIO as GPIO
 import threading
@@ -107,9 +108,12 @@ class LocalSensors():
         """
         config = toml.load(self.config_file)
 
+        index = 0
         for sensor, attributes in config.items():
+            attributes['index'] = index
+            index = index + 1
             self.sensors[sensor] = attributes
-            self.previous_measures[sensor] = deque(maxlen=attributes.get('stuck_threshold', 10))
+            self.previous_measures[sensor] = deque(maxlen=max(attributes.get('times_active_until_considered_stuck', 5), attributes.get('times_inactive_until_considered_empty', 5)))
 
     def start(self):
         """
@@ -118,16 +122,18 @@ class LocalSensors():
         # Create and start a thread for each sensor
         threads = []
         for sensor in self.sensors:
-            thread = threading.Thread(target=self.read_sensor, args=(sensor, self.sensors[sensor]['pin'],))
-            threads.append(thread)
-            thread.start()
+            pin = self.sensors[sensor].get('pin', -1)
+            if pin != -1:
+                thread = threading.Thread(target=self.read_sensor, args=(sensor, pin,))
+                threads.append(thread)
+                thread.start()
 
         # Keep the script running
         try:
             for thread in threads:
                 thread.join()
         except KeyboardInterrupt:
-            logging.getLogger("a2sensor").warn("Exiting")
+            logging.getLogger("a2sensor").warning("Exiting")
             self.exit_event.set()
             for thread in threads:
                 thread.join()
@@ -149,24 +155,30 @@ class LocalSensors():
                 value = GPIO.input(pin)
                 previous_values = self.previous_measures[sensorKey]
                 previous_values.append(value)
-                self.callback(self.sensors[sensorKey].get('id', sensorKey), self.sensors[sensorKey].get('name', sensorKey), self.to_status(previous_values))
+                self.callback(self.sensors[sensorKey].get('id', sensorKey), self.sensors[sensorKey].get('name', sensorKey), self.to_status(sensorKey, previous_values))
                 time.sleep(self.sensors[sensorKey].get('wait', 1))
         except KeyboardInterrupt:
-            logging.getLogger("a2sensor").warn("Exiting")
+            logging.getLogger("a2sensor").warning("Exiting")
             self.exit_event.set()
 
-    def to_status(self, previousValues: List[bool]) -> str:
+    def to_status(self, sensorKey:str, previousValues: List[bool]) -> str:
         """
         Converts given values from the sensors into a sensor status.
+        :param sensorKey: The sensor key.
+        :type sensorKey: str
         :param previousValues: The previous values.
         :type previousValues: List[bool]
         :return: The status.
         :rtype: str
         """
-        if all(previousValues):
-            result = "stuck"
-        elif all(not x for x in previousValues):
+        last_items_ok_count = min(self.sensors[sensorKey].get('times_active_until_considered_stuck', 5), len(previousValues))
+        last_items_ok = islice(previousValues, len(previousValues) - last_items_ok_count, None)
+        last_items_ko_count = min(self.sensors[sensorKey].get('times_inactive_until_considered_empty', 5), len(previousValues))
+        last_items_ko = islice(previousValues, len(previousValues) - last_items_ko_count, None)
+        if all(last_items_ok):
             result = "empty"
+        elif all(not x for x in last_items_ko):
+            result = "stuck"
         else:
             result = "ok"
 

@@ -20,14 +20,14 @@ _PYTHONEDA_PYTHONEDA_DEPS="$(echo "$PYTHONPATH" | sed 's : \n g' | grep -c 'pyth
 export _PYTHONEDA_PYTHONEDA_DEPS
 @BANNER@ -o "@org@" -r "@repo@" -t "@version@" -s "@pescio_space@" -a "@arch_role@" -l "@hexagonal_layer@" -p "@python_version@" -D "$_PYTHONEDA_DEPS" -d "$_PYTHONEDA_PYTHONEDA_DEPS" -n "@nixpkgs_release@"
 
-if [ "$#" -lt 1 ]; then
-    echo "Error: Missing mandatory data-folder argument."
-    echo "Usage: $0 <data-folder> [udp-port [http-port]|local-sensors-config]"
-    exit 1
-else
-    _DATA_FOLDER=$1
-    shift
-fi
+# if [ "$#" -lt 1 ]; then
+#    echo "Error: Missing mandatory data-folder argument."
+#    echo "Usage: $0 <data-folder> [udp-port [http-port]|local-sensors-config]"
+#    exit 1
+# else
+#    _DATA_FOLDER=$1
+#    shift
+# fi
 
 # if [ "$#" -ge 1 ]; then
 #     _UDP_PORT=$1
@@ -40,8 +40,8 @@ fi
 #     _HTTP_PORT=8080
 # fi
 
-if [ "$_HTTP_PORT" != "" ]; then
-    DATA_FOLDER="${_DATA_FOLDER}" UDP_PORT=${_UDP_PORT} @gunicorn@/bin/gunicorn a2sensor.sensor_collect.flask_app:app --bind "${_HTTP_PORT}"
-else
-    DATA_FOLDER="${_DATA_FOLDER}" "${_PYTHONEDA_PYTHON}" -m a2sensor.sensor_collect.sensor_collect "$@"
-fi
+#if [ "$_HTTP_PORT" != "" ]; then
+#    DATA_FOLDER="${_DATA_FOLDER}" UDP_PORT=${_UDP_PORT} @gunicorn@/bin/gunicorn a2sensor.sensor_collect.flask_app:app --bind "${_HTTP_PORT}"
+#else
+"${_PYTHONEDA_PYTHON}" -m a2sensor.sensor_collect.sensor_collect "$@"
+#fi

@@ -19,6 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 from .server import Server
+import os
 
 def configure_from_cli():
     """
@@ -29,6 +30,7 @@ def configure_from_cli():
     parser = argparse.ArgumentParser(
         description="Runs this server to read values from attached sensors"
     )
+    parser.add_argument("-d", "--data-folder", required=True, help="The data folder")
     parser.add_argument(
         "-c",
         "--local-sensors-config-file",
@@ -36,7 +38,7 @@ def configure_from_cli():
         help="The configuration file for the attached sensors",
     )
     args, unknown_args = parser.parse_known_args()
-    Server.configure(args.local_sensors_config_file)
+    Server.configure(args.data_folder, args.local_sensors_config_file)
 
 if __name__ == "__main__":
     configure_from_cli()

@@ -19,6 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 from flask import Flask, request, jsonify
+import os
 
 app = Flask(__name__)
 
@@ -56,3 +57,14 @@ def measure_endpoint(sensorId: str):
         Server.instance().save_to_file(sensorId, sensorName, sensorStatus)
 
     return jsonify(result), status_code
+
+if Server.instance() is None:
+    folder = os.environ.get('DATA_FOLDER', None)
+    if folder is None:
+        print(f"Error: The required environment variable DATA_FOLDER is not set.")
+        sys.exit(1)
+    file = os.environ.get('LOCAL_SENSORS_CONFIG_FILE', None)
+    if file is None:
+        print(f"Error: The required environment variable LOCAL_SENSORS_CONFIG_FILE is not set.")
+        sys.exit(1)
+    Server.configure(folder, file)
